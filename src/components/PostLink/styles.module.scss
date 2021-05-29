@@ -1,0 +1,38 @@
+.postCard {
+    .postTitle {
+        color      : var(--heading);
+        font-size  : 1.75rem;
+        font-weight: 700;
+    }
+
+    .postSubtitle {
+        margin-top : 0.5rem;
+        color      : var(--heading);
+        font-size  : 1.125rem;
+        font-weight: 400
+    }
+
+    .info {
+        margin-top: 1.5rem;
+        color     : var(--info);
+        display   : flex;
+        ;
+
+        .postInfo {
+            margin-right: 1.625rem;
+            display     : flex;
+            align-items : center;
+
+            svg {
+                margin-right: 0.5rem;
+            }
+
+        }
+
+
+    }
+
+    &+a {
+        margin-top: 3rem;
+    }
+}

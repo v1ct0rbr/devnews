@@ -1,1 +1,58 @@
 // TODO
+.banner {
+
+    height       : 25rem;
+    margin-bottom: 5rem;
+
+    overflow  : hidden;
+    text-align: center;
+
+    .imgBanner {
+        width     : 100%;
+        height    : fit-content;
+        object-fit: fill;
+    }
+
+
+}
+
+.article {
+    max-width: 45rem;
+    margin   : auto;
+
+    h1 {
+
+        color        : var(--heading);
+        font-size    : 3rem;
+        font-weight  : 700;
+        margin-bottom: 1.5rem;
+
+    }
+
+    .info {
+        margin-bottom  : 4rem;
+        display        : flex;
+        align-items    : center;
+        justify-content: flex-start;
+        color          : var(--info);
+
+        .infoItem {
+            display    : flex;
+            align-items: center;
+
+            &+span {
+                margin-left: 1.5rem;
+            }
+
+            svg {
+
+                margin-right: 0.5rem;
+               
+            }
+        }
+    }
+
+    .content {
+        color: var(--body);
+    }
+}
