@@ -16,7 +16,7 @@ interface PostProps {
     };
   };
 }
-export function PostLink({post}: PostProps) {
+export function PostLink({ post }: PostProps) {
   return (
     <Link href={`/post/${post.uid}`} key={post.uid}>
       <a className={styles.postCard}>
@@ -25,7 +25,9 @@ export function PostLink({post}: PostProps) {
         <div className={styles.info}>
           <time className={styles.postInfo}>
             <FiCalendar />
-            {post.first_publication_date}
+            {format(new Date(post.first_publication_date), 'd MMM yyyy', {
+              locale: ptBR,
+            })}
           </time>
           <span className={styles.postInfo}>
             <FiUser />

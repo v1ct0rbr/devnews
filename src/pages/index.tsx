@@ -1,19 +1,16 @@
-import React, { createElement, useEffect } from 'react';
+import React from 'react';
+import { useState } from 'react';
 import { GetStaticProps } from 'next';
 import Head from 'next/head';
 import Prismic from '@prismicio/client';
 import { getPrismicClient } from '../services/prismic';
 
-import commonStyles from '../styles/common.module.scss';
-import styles from './home.module.scss';
-import { FiCalendar, FiUser } from 'react-icons/fi';
-import { RichText } from 'prismic-dom';
 import { format } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
-import Link from 'next/link';
-import { ReactElement, useRef, useState } from 'react';
+
 import { PostLink } from '../components/PostLink';
-import Post from './post/[slug]';
+import commonStyles from '../styles/common.module.scss';
+import styles from './home.module.scss';
 
 interface Post {
   uid?: string;
@@ -27,6 +24,9 @@ interface Post {
 
 interface PostPagination {
   next_page: string;
+  total_pages: number;
+  total_results_size: number;
+  page: number;
   results: Post[];
 }
 
@@ -51,12 +51,15 @@ export default function Home({ postsPagination }: HomeProps) {
   const [newPosts, setNewPosts] = useState<Array<Post>>([]);
   const [result, setResult] = useState({
     next_page: postsPagination.next_page,
+    total_pages: postsPagination.total_pages,
+    page: postsPagination.page,
+    total_results_size: postsPagination.total_results_size,
   } as ResultProps);
 
   const handleLoadMore = async () => {
     let dados = [...newPosts];
 
-    await fetch(postsPagination.next_page)
+    await fetch(result.next_page)
       .then(response => response.json())
       .then(data => {
         setResult(data);
@@ -69,11 +72,7 @@ export default function Home({ postsPagination }: HomeProps) {
               subtitle: post.data.subtitle,
               author: post.data.author,
             },
-            first_publication_date: format(
-              new Date(post.first_publication_date),
-              'd MMM yyyy',
-              { locale: ptBR }
-            ),
+            first_publication_date: post.first_publication_date,
           } as Post;
         });
 
@@ -84,41 +83,6 @@ export default function Home({ postsPagination }: HomeProps) {
         setNewPosts(dados);
       });
   };
-
-  function createLinkElement(post: Post) {
-    return React.createElement('link', { children: getPostLink(post) });
-  }
-
-  /*   const createLinkElement = (post: Post) => {
-    let elem = createElement('link', {
-      className: styles.postCard,
-      children: {
-        type: 'link',{props:teste(post)},
-      },
-    });
-    return elem;
-  }; */
-
-  function getPostLink(post: Post): ReactElement {
-    return (
-      <Link href={`/post/${post.uid}`} key={post.uid}>
-        <a className={styles.postCard}>
-          <h2 className={styles.postTitle}>{post.data.title}</h2>
-          <h3 className={styles.postSubtitle}>{post.data.subtitle}</h3>
-          <div className={styles.info}>
-            <time className={styles.postInfo}>
-              <FiCalendar />
-              {post.first_publication_date}
-            </time>
-            <span className={styles.postInfo}>
-              <FiUser />
-              {post.data.author}
-            </span>
-          </div>
-        </a>
-      </Link>
-    );
-  }
 
   return (
     <>
@@ -134,16 +98,19 @@ export default function Home({ postsPagination }: HomeProps) {
             <PostLink key={post.uid} post={post} />
           ))}
         </div>
-
-        <a
-          href="#"
-          onClick={handleLoadMore}
-          className={`${styles.loadMore} ${
-            result.next_page ? '' : styles.invisible
-          }`}
-        >
-          Carregar mais posts
-        </a>
+        {result.next_page ? (
+          <a
+            href="#"
+            onClick={handleLoadMore}
+            className={`${styles.loadMore} ${
+              result.next_page ? '' : styles.invisible
+            }`}
+          >
+            Carregar mais posts
+          </a>
+        ) : (
+          ''
+        )}
       </main>
     </>
   );
@@ -169,11 +136,12 @@ export const getStaticProps: GetStaticProps = async () => {
         subtitle: post.data.subtitle,
         author: post.data.author,
       },
-      first_publication_date: format(
+      /* first_publication_date: format(
         new Date(post.first_publication_date),
         'd MMM yyyy',
         { locale: ptBR }
-      ),
+      ), */
+      first_publication_date: post.first_publication_date,
     } as Post;
   });
 
@@ -181,6 +149,9 @@ export const getStaticProps: GetStaticProps = async () => {
     props: {
       postsPagination: {
         next_page: postsResponse.next_page,
+        page: postsResponse.page,
+        total_results_size: postsResponse.total_results_size,
+        total_pages: postsResponse.total_pages,
         results: posts,
       },
     },
