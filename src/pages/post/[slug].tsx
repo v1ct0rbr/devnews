@@ -2,7 +2,7 @@ import format from 'date-fns/format';
 import { ptBR } from 'date-fns/locale';
 import { GetStaticPaths, GetStaticProps } from 'next';
 import Head from 'next/head';
-import readingTime from 'reading-time';
+
 import Prismic from '@prismicio/client';
 import { RichText } from 'prismic-dom';
 
@@ -13,13 +13,7 @@ import { getPrismicClient } from '../../services/prismic';
 import commonStyles from '../../styles/common.module.scss';
 import styles from './post.module.scss';
 import { useRouter } from 'next/router';
-
-interface ReadingProps {
-  text: string;
-  minutes: number;
-  time: number;
-  words: number;
-}
+import Comments from '../../components/Comments';
 
 interface Content {
   /* heading: string;
@@ -117,6 +111,7 @@ export default function Post({ post }: PostProps) {
             </div>
           </div>
         </article>
+        <Comments />
       </main>
     </>
   );
