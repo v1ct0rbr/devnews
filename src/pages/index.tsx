@@ -11,7 +11,6 @@ import ptBR from 'date-fns/locale/pt-BR';
 import { PostLink } from '../components/PostLink';
 import commonStyles from '../styles/common.module.scss';
 import styles from './home.module.scss';
-import Comments from '../components/Comments';
 
 interface Post {
   uid?: string;
@@ -112,7 +111,6 @@ export default function Home({ postsPagination }: HomeProps) {
         ) : (
           ''
         )}
-        <Comments />
       </main>
     </>
   );
