@@ -31,4 +31,4 @@ O template está disponível na seguinte URL:
 - react-icons;
 - date-fns.
 
-https://user-images.githubusercontent.com/61063376/120085424-5fdb9280-c0ae-11eb-9dd6-0c300891bf02.mp4
+<a href="https://firebasestorage.googleapis.com/v0/b/my-images-debc9.appspot.com/o/projetos%2Fignite-reactnative%2Fgofinances%2F2021-05-31%2022-54-43.mp4?alt=media&token=8ba4f31c-1b22-4574-9721-fe9532b60614">Video demo</a>
