@@ -81,6 +81,8 @@ export default function Post({
     return estimatedTime;
   };
 
+ 
+
   return (
     <>
       <Head>
@@ -109,7 +111,7 @@ export default function Post({
               </span>
             </div>
             <div className={styles.edition_date}>
-              {post.first_publication_date != post.last_publication_date
+              {post.first_publication_date !== post.last_publication_date
                 ? format(
                     new Date(post.last_publication_date),
                     "'* editado em' dd MMM yyyy', às' H':'mm",
@@ -229,7 +231,14 @@ export const getStaticProps: GetStaticProps = async ({
   );
   const nextPost = responseNextPost.results;
 
-  console.log({ ...response });
+  /*  const last_publication_date =
+    response.first_publication_date !== response.last_publication_date
+      ? format(
+          new Date(response.last_publication_date),
+          "'* editado em' dd MMM yyyy', às' H':'mm",
+          { locale: ptBR }
+        )
+      : ''; */
 
   return {
     props: {
