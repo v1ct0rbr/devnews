@@ -1,6 +1,6 @@
 import format from 'date-fns/format';
 import { ptBR } from 'date-fns/locale';
-import { GetStaticPaths, GetStaticProps } from 'next';
+import next, { GetStaticPaths, GetStaticProps } from 'next';
 import Head from 'next/head';
 
 import Prismic from '@prismicio/client';
@@ -14,6 +14,8 @@ import commonStyles from '../../styles/common.module.scss';
 import styles from './post.module.scss';
 import { useRouter } from 'next/router';
 import Comments from '../../components/Comments';
+import { useState } from 'react';
+import Link from 'next/link';
 
 interface Content {
   /* heading: string;
@@ -22,9 +24,18 @@ interface Content {
   body: String[];
 }
 
+interface postLink {
+  uid: string;
+  data: {
+    title: string;
+    subtitle: string;
+  };
+}
+
 interface PostType {
   uid: string;
   first_publication_date: string | null;
+  last_publication_date: string | null;
   data: {
     title: string;
     subtitle: string;
@@ -37,10 +48,20 @@ interface PostType {
 }
 
 interface PostProps {
+  preview: boolean;
   post: PostType;
+  previousPost: postLink;
+  nextPost: postLink;
 }
 
-export default function Post({ post }: PostProps) {
+const initialPostLink = { uid: '', data: { title: '', subtitle: '' } };
+
+export default function Post({
+  preview,
+  post,
+  previousPost,
+  nextPost,
+}: PostProps) {
   const router = useRouter();
 
   if (router.isFallback) {
@@ -59,17 +80,6 @@ export default function Post({ post }: PostProps) {
 
     return estimatedTime;
   };
-
-  /* const calcTotalTime = (post: PostType): number => {
-    const totalTime = post.data.content.reduce((currTime, currentContent) => {
-      const body = RichText.asText(currentContent.body);
-      const statsHeading = readingTime(currentContent.heading);
-      const statsBody = readingTime(body);
-      return currTime + statsHeading.time + statsBody.time;
-    }, 0);
-
-    return Math.round(totalTime / 1000 / 60);
-  }; */
 
   return (
     <>
@@ -98,6 +108,15 @@ export default function Post({ post }: PostProps) {
                 <span>{`${calcTotalTime(post.data.content)} min`}</span>
               </span>
             </div>
+            <div className={styles.edition_date}>
+              {post.first_publication_date != post.last_publication_date
+                ? format(
+                    new Date(post.last_publication_date),
+                    "'* editado em' dd MMM yyyy', às' H':'mm",
+                    { locale: ptBR }
+                  )
+                : ''}
+            </div>
 
             <div className={styles.content}>
               {post.data.content.map(({ heading, body }) => (
@@ -111,7 +130,47 @@ export default function Post({ post }: PostProps) {
             </div>
           </div>
         </article>
-        <Comments />
+        <div className={styles.postLinks}>
+          {previousPost?.uid ? (
+            <div className={styles.link}>
+              <Link href={`${previousPost?.uid}`}>
+                <a>
+                  <h3 className={styles.title}>{previousPost.data.title}</h3>
+
+                  <span className={styles.obs}>Post Anterior</span>
+                </a>
+              </Link>
+            </div>
+          ) : (
+            <div></div>
+          )}
+
+          {nextPost?.uid ? (
+            <div className={`${styles.link} ${styles.right}`}>
+              <Link href={`${nextPost?.uid}`}>
+                <a>
+                  <h3 className={styles.title}>{nextPost.data.title}</h3>
+                  <span className={styles.obs}>Próximo Post</span>
+                </a>
+              </Link>
+            </div>
+          ) : (
+            ''
+          )}
+        </div>
+        <Comments
+          label={post.data.title}
+          repo="v1ct0rbr/devnews"
+          issueTitle={post.uid}
+          theme="photon-dark"
+        />
+        {preview && (
+          <aside>
+            <Link href="/api/exit-preview">
+              <a className={commonStyles.buttonPreview}>Sair do modo Preview</a>
+            </Link>
+          </aside>
+        )}
       </main>
     </>
   );
@@ -137,47 +196,47 @@ export const getStaticPaths: GetStaticPaths = async () => {
   };
 };
 
-export const getStaticProps: GetStaticProps = async context => {
-  const { slug } = context.params;
+export const getStaticProps: GetStaticProps = async ({
+  params,
+  preview = false,
+  previewData,
+}) => {
+  const { slug } = params;
 
   const prismic = getPrismicClient();
 
-  const response = await prismic.getByUID('posts', String(slug), {});
-  // console.log(response.data.content[0].body);
+  const response = await prismic.getByUID('posts', String(slug), {
+    ref: previewData?.ref || null,
+  });
 
-  /* const post = {
-    uid: response.uid,
-    first_publication_date: response.first_publication_date,
+  const responsePreviousPost = await prismic.query(
+    [Prismic.Predicates.at('document.type', 'posts')],
+    {
+      pageSize: 1,
+      after: response.id,
+      orderings: '[document.first_publication_date]',
+    }
+  );
+  const previousPost = responsePreviousPost.results;
 
-    data: {
-      title: response.data.title,
-      subtitle: response.data.subtitle,
-      author: response.data.author,
-      banner: {
-        url: response.data.banner.url,
-      },
+  const responseNextPost = await prismic.query(
+    [Prismic.Predicates.at('document.type', 'posts')],
+    {
+      pageSize: 1,
+      after: response.id,
+      orderings: '[document.first_publication_date desc]' /** ordenação */,
+    }
+  );
+  const nextPost = responseNextPost.results;
 
-      content: response.data.content.map(content => {
-        return {
-          // heading: content.heading,
-          // ,
-          heading: content.heading,
-          body: content.body,
-        } as Content;
-      }),
-    },
-  } as PostType; */
-  const post = { ...response };
-
-  // console.log(post.data.content[0].body[0]);
+  console.log({ ...response });
 
   return {
     props: {
-      post,
+      preview,
+      post: { ...response } ?? null,
+      previousPost: previousPost.length > 0 ? previousPost[0] : initialPostLink,
+      nextPost: nextPost.length > 0 ? nextPost[0] : initialPostLink,
     },
   };
-
-  //  const response = await prismic.getByUID(TODO);
-
-  // TODO
 };

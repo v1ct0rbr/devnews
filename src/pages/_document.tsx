@@ -1,6 +1,12 @@
 import Document, { Html, Head, Main, NextScript } from 'next/document';
+// import { createResolver } from 'next-slicezone/resolver';
 
 export default class MyDocument extends Document {
+ /*  static async getInitialProps(ctx) {
+    const initialProps = await Document.getInitialProps(ctx);
+    await createResolver();
+    return { ...initialProps };
+  } */
   render() {
     return (
       <Html>
@@ -15,6 +21,11 @@ export default class MyDocument extends Document {
             rel="stylesheet"
           />
           <link rel="shortcut icon" href="/favicon.png" type="image/png" />
+          <script
+            async
+            defer
+            src="https://static.cdn.prismic.io/prismic.js?new=true&repo=devrocketnews"
+          ></script>
         </Head>
         <body>
           <Main />
